@@ -1,16 +1,16 @@
-#include "stdafx.h"
+#include <windows.h>
+
 #pragma data_seg("FuckLogitech")
-	int pid = 0;
+int pid = 0;
 #pragma data_seg()
 #pragma comment(linker,"/SECTION:FuckLogitech,RWS")
 
-HHOOK myhook;
-
 LRESULT CALLBACK MouseWheel(int nCode, WPARAM wParam, LPARAM lParam)
 {
+	int wData;
 	if (nCode >= 0 && wParam == WM_MOUSEWHEEL)
 	{
-		int wData = (int)(((MSLLHOOKSTRUCT *)lParam)->mouseData);
+		wData = (int)(((MSLLHOOKSTRUCT *)lParam)->mouseData);
 		if (wData > 0)
 		{
 			keybd_event(VK_VOLUME_UP, 0, 0, 0);
@@ -21,11 +21,10 @@ LRESULT CALLBACK MouseWheel(int nCode, WPARAM wParam, LPARAM lParam)
 		}
 		return true;
 	}
-	return CallNextHookEx(myhook, nCode, wParam, lParam);
+	return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-	LPSTR lpCmdLine, int nCmdShow)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	if (pid > 0)
 	{
@@ -35,7 +34,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 	pid = GetCurrentProcessId();
 
-	myhook = SetWindowsHookEx(
+	SetWindowsHookEx(
 		WH_MOUSE_LL,
 		MouseWheel,
 		hInstance,
@@ -45,10 +44,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	keybd_event(VK_VOLUME_DOWN, 0, 0, 0);
 
 	MSG Msg;
-	while (GetMessage(&Msg, NULL, 0, 0))
-	{
-		//TranslateMessage(&Msg);
-		//DispatchMessage(&Msg);
-	}
+	GetMessage(&Msg, NULL, 0, 0);
 	return 0;
 }
